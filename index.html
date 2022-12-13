@@ -1,0 +1,154 @@
+<h2 id="container">1. Container</h2>
+<p><img
+src="https://www.thegioimaychu.vn/blog/wp-content/uploads/2020/02/tgmc-blog-5e534fcaa1861.png" /></p>
+<p>Một run-time environment mà ở đó người dùng có thể chạy một ứng dụng
+độc lập, những container này rất gọn nhẹ và cho phép chạy ứng dụng trong
+đó rất nhanh chóng và dễ dàng.</p>
+<p>Tính năng quan trọng của container là tính chuẩn xác cho việc chạy
+các ứng dụng trong container. Không chỉ đảm bảo cho ứng dụng hoạt động
+như nhau trong các môi trường giống nhau, nó còn làm đơn giản việc cài
+đặt và chia sẻ cài đặt này cho các thành viên trong team.</p>
+<p>Container hoạt động độc lập, nó đảm bảo không làm ảnh hưởng xấu đến
+các container khác, cũng như server mà nó đang chạy trong đó. Docker
+được cho là "tạo ra sự độc lập tuyệt vời". Vì vậy, sẽ không cần lo lắng
+việc máy tính bị xung đột do ứng dụng đang được phát triển được chạy
+trong container.</p>
+Không giống như máy ảo (VM) nơi mà sự ảo hóa (virtualization) xảy ra ở
+tầng phần cứng (hardware level), container chỉ ảo hóa ở lớp ứng dụng
+(app level). Nó có thể dùng 1 máy, chia sẻ kernel và giả môi trường để
+chạy process độc lập. Điều này làm cho container cực kì nhẹ, không chiếm
+nhiều tài nguyên của máy.
+<p align="center">
+<strong>Focus: Container ảo hóa ở tầng application</strong>
+</p>
+<h2 id="kiến-trúc-của-service-hoạt-động-trên-máy-ảo">2. Kiến trúc của
+service hoạt động trên máy ảo</h2>
+<p>Máy ảo (Virtual Machine – VM) là một mô phỏng của hệ thống máy tính.
+Nói một cách đơn giản, công nghệ này giúp người dùng có thể tạo ra nhiều
+“máy tính logic” trên một “máy tính vật lý”, dễ dàng quản lý vấn đề bảo
+mật.</p>
+<p>+ <strong>Infrastructure</strong> (hạ tầng): có thể là laptop, một
+server (máy chủ) chuyên dụng (dedicated server) hoat động trong một
+trung tâm dữ liệu (Data Center) hoặc một server riêng ảo (Virtual
+Private Server – VPS) trên cloud</p>
+<p>+ <strong>Host Operating System</strong> (hệ điều hành của server):
+hệ điều hành đang sử dụng cho server đang sử dụng, có thể là macOS,
+Windows hoặc Linux.</p>
+<p>+ <strong>Hypervisor</strong> (phần mềm giám sát máy ảo): có thể coi
+máy ảo như một máy tính độc lập được đóng gói vào một tập tin duy nhất,
+nhưng cần phải có một phần mềm để có thể chạy tập tin đó. Các hypervisor
+được sử dụng để tạo, startup, dừng và reset lại các máy ảo, cho phép mỗi
+máy ảo hoặc “guest” truy cập vào lớp tài nguyên phần cứng vật lý bên
+dưới, chẳng hạn như CPU, RAM và ổ cứng. Phần mềm này cũng có thể giới
+hạn số lượng tài nguyên hệ thống mà mỗi máy ảo có thể sử dụng để đảm bảo
+cho nhiều máy ảo cùng hoạt động đồng thời trên một hệ thống. Có thể kể
+đến các hypervisor phổ biến trên thị trường hiện nay như HyperKit cho
+macOS, Hyper-V cho Windows và KVM cho Linux. Ngoài ra, 2 hypervisor phổ
+biến khác là VirtualBox và VMWare.</p>
+<p>+ <strong>Guest OS</strong> (hệ điều hành của máy ảo): với mỗi máy ảo
+được tạo ra, người quản trị cần phải cài đặt một hệ điều hành đi kèm cho
+máy ảo đó để cài đặt và triển khai các service cần thiết. Ví dụ bạn cần
+triển khai 3 service trên 3 máy ảo khác nhau và mỗi “Guest OS” sẽ tiêu
+tốn ít nhất 700 MB dung lượng ổ cứng, vậy sẽ tiêu tốn khoảng 2.1 GB dung
+lượng ổ cứng của server để tạo 3 máy ảo để triển khai 3 service khác
+nhau. Chưa kể để các “Guest OS” này sẽ sử dụng một lượng tài nguyên khác
+của hệ thống như CPU, RAM.</p>
+<p>+ <strong>Bins / Libs</strong> (các tập tin / thư viện cần thiết):
+các service / application sẽ cần phải có các gói tập tin, thư viện đi
+kèm để có thể hoạt động.</p>
+<p>+ <strong>App</strong> (application – service): mã nguồn của các ứng
+dụng, phần mềm.</p>
+<h2 id="kiến-trúc-của-service-hoạt-động-trên-docker-container">3. Kiến
+trúc của service hoạt động trên Docker container</h2>
+<p>+ <strong>Infrastructure</strong> (hạ tầng): có thể là laptop, một
+server chuyên dụng (dedicated server) hoat động trong một trung tâm dữ
+liệu (Data Center) hoặc một server riêng ảo (Virtual Private Server –
+VPS) trên cloud</p>
+<p>+ <strong>Host Operating System</strong> (hệ điều hành của server):
+hệ điều hành đang sử dụng cho server đang sử dụng, có thể là macOS,
+Windows hoặc Linux.</p>
+<p>+ <strong>Docker daemon</strong> (còn gọi là Docker Engine): đây là
+service hoạt động trên server, được dùng để quản lý các thành phần cần
+thiết để khởi tạo và tương tác với Docker container.</p>
+<p>+ <strong>Bins / Libs</strong> (các tập tin / thư viện cần thiết):
+các gói tập tin, thư viện đi kèm của service được thêm vào Docker
+image.</p>
+<p>+ <strong>App</strong> (application – service): mã nguồn của các ứng
+dụng, phần mềm được thêm vào Docker container.</p>
+<h2 id="sự-khác-nhau-giữa-máy-ảo-và-docker-container">4. Sự khác nhau
+giữa máy ảo và Docker Container</h2>
+<blockquote>
+<p>Docker container loại bỏ lớp "Guest OS" với tốc độ khởi tạo service
+nhanh hơn hẳn so với việc sử dụng máy ảo. Docker Container sẽ giảm thiểu
+và đơn giản hóa các bản cập nhật bảo mật.</p>
+</blockquote>
+<blockquote>
+<p>Docker daemon có thể giao tiếp trực tiếp với hệ điều hành của server
+và phân bổ tài nguyên cho các Docker container đang chạy, đảm bảo mỗi
+container hoạt động độc lập với các container khác và hệ điều hành của
+server. Thay vì phải đợi một phút để máy ảo khởi động, người dùng có thể
+khởi động Docker container chỉ trong vài mili giây và tiết kiệm được rất
+nhiều dung lượng ổ đĩa và các tài nguyên hệ thống khác do không cần phải
+sử dụng “guest OS” cồng kềnh cho mỗi ứng dụng. Người dùng sẽ không cần
+ảo hóa vì Docker chạy trực tiếp trên hệ điều hành của server.</p>
+</blockquote>
+<h4 id="virtualization">- Virtualization</h4>
+<blockquote>
+<p>Kích thước (dung lượng) lớn. - imgae</p>
+</blockquote>
+<blockquote>
+<p>Hiệu suất hạn chế.</p>
+</blockquote>
+<blockquote>
+<p>Mỗi máy ảo sẽ có một hệ điều hành riêng.</p>
+</blockquote>
+<blockquote>
+<p>Ảo hóa về mặt phần cứng</p>
+</blockquote>
+<blockquote>
+<p>Thời gian khởi động tính theo phút</p>
+</blockquote>
+<blockquote>
+<p>Phân bổ bộ nhớ theo nhu cầu cần thiết</p>
+</blockquote>
+<blockquote>
+<p>Hoàn toàn bị cô lập và an toàn hơn</p>
+</blockquote>
+<h4 id="docker-container">- Docker Container</h4>
+<blockquote>
+<p>Kích thước (dung lượng) nhỏ. - image</p>
+</blockquote>
+<blockquote>
+<p>Hiệu suất gốc (native).</p>
+</blockquote>
+<blockquote>
+<p>Container sẽ sử dụng hệ điều hành của host.</p>
+</blockquote>
+<blockquote>
+<p>Ảo hóa về mặt hệ điều hành</p>
+</blockquote>
+<blockquote>
+<p>Thời gian khởi động tính theo mili giây</p>
+</blockquote>
+<blockquote>
+<p>Yêu cầu ít dung lượng bộ nhớ hơn</p>
+</blockquote>
+<blockquote>
+<p>Cô lập ở mức tiến trình, có thể kém an toàn hơn</p>
+</blockquote>
+<h4 id="note-that">- Note that</h4>
+<pre class="text"><code>Việc sử dụng máy ảo hay Docker container sẽ phụ thuộc vào nhu cầu sử
+dụng của người dùng. Máy ảo rất phù hợp trong việc cách ly tài nguyên hệ
+thống và toàn bộ môi trường làm việc. Đây sẽ là lựa chọn tốt hơn để chạy
+các ứng dụng yêu cầu tất cả tài nguyên và chức năng của hệ điều hành khi
+bạn cần chạy nhiều ứng dụng trên server hoặc có nhiều hệ điều hành khác
+nhau để quản lý. Ví dụ: công ty của bạn cung cấp dịch vụ web hosting,
+bạn có thể sẽ sử dụng máy ảo để phân phối tài nguyên của server công ty
+cho từng khách hàng.
+
+Mặt khác, triết lý của Docker là cô lập các ứng dụng riêng lẻ, không
+phải toàn bộ hệ thống. Một ví dụ hoàn hảo về điều này sẽ là chia nhỏ một
+loạt các dịch vụ ứng dụng web thành các Docker image của riêng chúng và
+triển khai chúng bằng Docker Container. Docker Container là lựa chọn tốt
+hơn khi ưu tiên lớn nhất của bạn là tối đa hóa số lượng ứng dụng đang
+chạy trên một số lượng server tối thiểu.</code></pre>
